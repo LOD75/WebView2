@@ -1,2 +1,0 @@
-C:\WebView2\Debug\WebView2Loader.dll
-C:\WebView2\Debug\WebView2.exe

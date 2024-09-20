@@ -1,2 +1,0 @@
-C:\WebView2Sample\WebView2Samples\GettingStartedGuides\Win32_GettingStarted\Release\WebView2Loader.dll
-C:\WebView2Sample\WebView2Samples\GettingStartedGuides\Win32_GettingStarted\Release\WebView2GettingStarted.exe
