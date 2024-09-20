@@ -1,0 +1,7 @@
+﻿  HelloWebView.cpp
+C:\WebView2Sample\WebView2Samples\GettingStartedGuides\Win32_GettingStarted\HelloWebView.cpp(158,1): warning C4267: 'initializing': conversion from 'size_t' to 'ULONG', possible loss of data
+  Generating code
+  Previous IPDB not found, fall back to full compilation.
+  All 556 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  WebView2GettingStarted.vcxproj -> C:\WebView2Sample\WebView2Samples\GettingStartedGuides\Win32_GettingStarted\x64\Release\WebView2GettingStarted.exe

@@ -1,0 +1,3 @@
+﻿  HelloWebView.cpp
+C:\WebView2Sample\WebView2Samples\GettingStartedGuides\Win32_GettingStarted\HelloWebView.cpp(174,1): warning C4267: 'initializing': conversion from 'size_t' to 'ULONG', possible loss of data
+  WebView2GettingStarted.vcxproj -> C:\WebView2Sample\WebView2Samples\GettingStartedGuides\Win32_GettingStarted\x64\Debug\WebView2GettingStarted.exe
