@@ -6,6 +6,7 @@
 #include <tchar.h>
 #include <wrl.h>
 #include <wil/com.h>
+#include <Magick++.h>
 // <IncludeHeader>
 // include WebView2 header
 #include "WebView2.h"
@@ -34,6 +35,50 @@ static wil::com_ptr<ICoreWebView2Environment6> environment;
 // Pointer to WebView window
 static wil::com_ptr<ICoreWebView2_16> webview;
 
+/*void convert2tiff(IStream* imageStream, const wchar_t* outputFilePath);
+
+class CapturePreviewHandler : public RuntimeClass<RuntimeClassFlags<ClassicCom>, ICoreWebView2CapturePreviewCompletedHandler>
+{
+public:
+	HRESULT STDMETHODCALLTYPE Invoke(HRESULT errorCode, IStream* stream)
+	{
+		if (SUCCEEDED(errorCode) && stream)
+		{
+			imageStream = stream;
+			convert2tiff(imageStream, outFile);
+			imageStream->Release();
+		}
+		return S_OK;
+	}
+	IStream* imageStream;
+};
+
+void convert2tiff(IStream* imageStream, const wchar_t* outputFilePath)
+{
+	Magick::InitializeMagick(NULL);
+
+	Magick::Blob blob;
+
+	HRESULT hr = imageStream->Seek({ 0 }, STREAM_SEEK_SET, nullptr);
+	ULONG bytesRead;
+	std::vector<char> buffer;
+	char temp[4096];
+
+	while (SUCCEEDED(hr) && (SUCCEEDED(imageStream->Read(temp, sizeof(temp), &bytesRead) && bytesRead > 0)))
+	{
+		buffer.insert(buffer.end(), temp, temp + bytesRead);
+	}
+
+	Magick::Image image;
+	image.read(blob);
+	//writing the tiff file completing the conversion from html to tiff
+	int size = WideCharToMultiByte(CP_UTF8, 0, outFile, -1, NULL, 0, NULL, NULL);
+	std::string finalOutFile(size, 0);
+	image.write(finalOutFile);
+}*/
+
+void printTiff(const wchar_t* outFile);
+
 int CALLBACK WinMain(
 	_In_ HINSTANCE hInstance,
 	_In_ HINSTANCE hPrevInstance,
@@ -41,6 +86,23 @@ int CALLBACK WinMain(
 	_In_ int       nCmdShow
 )
 {
+	HRESULT hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+	int numArgs;
+	wchar_t* cmdLine = GetCommandLineW();
+	wprintf(L"Command Line: %s", cmdLine);
+	wchar_t** argv = CommandLineToArgvW(GetCommandLineW(), &numArgs);
+
+	if(numArgs < 2)
+	{
+		wprintf(L"No HTML file specified.\n");
+		return 1;
+	}
+
+	std::wstring temp = argv[1];
+	wchar_t* outFile = argv[2];
+	LPCWSTR infile = temp.c_str();
+	// Free memory allocated for CommandLineToArgvW arguments.
+	LocalFree(argv);
 	WNDCLASSEX wcex;
 
 	wcex.cbSize = sizeof(WNDCLASSEX);
@@ -113,11 +175,11 @@ int CALLBACK WinMain(
 	// Locate the browser and set up the environment for WebView
 	CreateCoreWebView2EnvironmentWithOptions(nullptr, nullptr, nullptr,
 		Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>(
-			[hWnd](HRESULT result, ICoreWebView2Environment* env) -> HRESULT {
+			[hWnd,infile,outFile](HRESULT result, ICoreWebView2Environment* env) -> HRESULT {
 
 				// Create a CoreWebView2Controller and get the associated CoreWebView2 whose parent is the main window hWnd
 				env->CreateCoreWebView2Controller(hWnd, Callback<ICoreWebView2CreateCoreWebView2ControllerCompletedHandler>(
-					[hWnd](HRESULT result, ICoreWebView2Controller* controller) -> HRESULT {
+					[hWnd, infile, outFile](HRESULT result, ICoreWebView2Controller* controller) -> HRESULT {
 						if (controller != nullptr) {
 							webviewController = controller;
 							wil::com_ptr<ICoreWebView2> webview2;
@@ -134,13 +196,13 @@ int CALLBACK WinMain(
 						settings->put_IsWebMessageEnabled(TRUE);
 
 
-						/*wil::com_ptr<ICoreWebView2PrintSettings> printSettings;
+						wil::com_ptr<ICoreWebView2PrintSettings> printSettings;
 						environment->CreatePrintSettings(&printSettings);
 
 						wil::com_ptr<ICoreWebView2PrintSettings2> printSettings2;
 						printSettings->QueryInterface(IID_PPV_ARGS(&printSettings2));
 
-						printSettings->put_Orientation(COREWEBVIEW2_PRINT_ORIENTATION_PORTRAIT);*/
+						printSettings->put_Orientation(COREWEBVIEW2_PRINT_ORIENTATION_PORTRAIT);
 
 						// Resize WebView to fit the bounds of the parent window
 						RECT bounds;
@@ -148,59 +210,14 @@ int CALLBACK WinMain(
 						webviewController->put_Bounds(bounds);
 
 						//Navigate to html document
-						webview->Navigate(L"C:\\WebView2Sample\\WebView2Samples\\GettingStartedGuides\\Win32_GettingStarted\\HTMLPage1.html");
+						webview->Navigate(infile);
 
-						//ULONG size = (file.GetLength() + 1) * (sizeof(WCHAR));
-						const wchar_t* characters = L"C:\\WebView2Sample\\WebView2Samples\\GettingStartedGuides\\Win32_GettingStarted\\HTMLPage1.html";
-						ULONG size = wcslen(characters) + 1;
-						LPWSTR temp = new wchar_t[size];
-						wcsncpy_s(temp,size, characters, size -1);
-						wil::unique_cotaskmem_string title = wil::make_cotaskmem_string(temp, size);
-						webview->get_DocumentTitle(&title);
-
-						webview->Print(nullptr,
-							//printSettings.get(),
-							Callback<ICoreWebView2PrintCompletedHandler>(
-								[title = std::move(title)](HRESULT errorCode, COREWEBVIEW2_PRINT_STATUS printStatus)->HRESULT
-						{
-							std::wstring message = L"";
-							if (errorCode == S_OK && printStatus == COREWEBVIEW2_PRINT_STATUS_SUCCEEDED)
-							{
-								message = L"Printing " + std::wstring(title.get()) +
-									L" document to printer is succeeded";
-							}
-							else if (
-								errorCode == S_OK &&
-								printStatus == COREWEBVIEW2_PRINT_STATUS_PRINTER_UNAVAILABLE)
-							{
-								message = L"Selected printer is not found, not available, offline or "
-									L"error state.";
-							}
-							else if (errorCode == E_INVALIDARG)
-							{
-								message = L"Invalid settings provided for the specified printer";
-							}
-							else if (errorCode == E_ABORT)
-							{
-								message = L"Printing " + std::wstring(title.get()) +
-									L" document already in progress";
-							}
-							else
-							{
-								message = L"Printing " + std::wstring(title.get()) +
-									L" document to printer is failed";
-							}
-
-							//AsyncMessageBox(message, L"Print to printer");
-
-							return S_OK;
-						}).Get());
 						return S_OK;
 					}).Get());
 				return S_OK;
 			}).Get());
 
-
+	//printTiff(infile);
 	
 	// <-- WebView2 sample code ends here -->
 
@@ -211,6 +228,8 @@ int CALLBACK WinMain(
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
+	//printTiff(infile);
+	CoUninitialize();
 
 	return (int)msg.wParam;
 }
@@ -227,7 +246,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	switch (message)
 	{
 	case WM_SIZE:
-		if (webviewController != nullptr) {
+		if (webviewController != nullptr) 
+		{
 			RECT bounds;
 			GetClientRect(hWnd, &bounds);
 			webviewController->put_Bounds(bounds);
@@ -242,4 +262,50 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 
 	return 0;
+}
+
+void printTiff(const wchar_t* outFile)
+{
+	ULONG size = wcslen(outFile) + 1;
+	LPWSTR temp = new wchar_t[size];
+	wcsncpy_s(temp, size, outFile, size - 1);
+	wil::unique_cotaskmem_string title = wil::make_cotaskmem_string(temp, size);
+	webview->get_DocumentTitle(&title);
+
+	webview->Print(nullptr,
+		//printSettings.get(),
+		Callback<ICoreWebView2PrintCompletedHandler>(
+			[title = std::move(title)](HRESULT errorCode, COREWEBVIEW2_PRINT_STATUS printStatus)->HRESULT
+	{
+		std::wstring message = L"";
+		if (errorCode == S_OK && printStatus == COREWEBVIEW2_PRINT_STATUS_SUCCEEDED)
+		{
+			message = L"Printing " + std::wstring(title.get()) +
+				L" document to printer is succeeded";
+		}
+		else if (
+			errorCode == S_OK &&
+			printStatus == COREWEBVIEW2_PRINT_STATUS_PRINTER_UNAVAILABLE)
+		{
+			message = L"Selected printer is not found, not available, offline or "
+				L"error state.";
+		}
+		else if (errorCode == E_INVALIDARG)
+		{
+			message = L"Invalid settings provided for the specified printer";
+		}
+		else if (errorCode == E_ABORT)
+		{
+			message = L"Printing " + std::wstring(title.get()) +
+				L" document already in progress";
+		}
+		else
+		{
+			message = L"Printing " + std::wstring(title.get()) +
+				L" document to printer is failed";
+		}
+		return S_OK;
+	}).Get());
+	//PostQuitMessage(0);
+	//AsyncMessageBox(message, L"Print to printer");
 }

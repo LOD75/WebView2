@@ -1,9 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LocalDebuggerCommandArguments>C:\Softlinx\ReplixServer\convertq\tmp\0e54ed60312d6696.html C:\Softlinx\ReplixServer\tmp\webview2tiff116795b58f5bcd6eafb4683d77e7be6\out.tif</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>C:\build\webview\WebView2\HTMLPage1.html</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerCommand />
     <LocalDebuggerWorkingDirectory />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LocalDebuggerCommandArguments>C:\build\webview\WebView2\HTMLPage1.html</LocalDebuggerCommandArguments>
+    <LocalDebuggerWorkingDirectory>.\x64\Debug</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>
