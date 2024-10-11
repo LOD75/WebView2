@@ -7,7 +7,7 @@
     <LocalDebuggerWorkingDirectory />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LocalDebuggerCommandArguments>C:\build\webview\WebView2\HTMLPage1.html</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>C:\Softlinx\ReplixServer\tmp\cvt.f9fb064d21ffd176.html C:\Softlinx\ReplixServer\tmp\webview2tif9032ff27cd4f1986ceb883c2932106bd\out.tif</LocalDebuggerCommandArguments>
     <LocalDebuggerWorkingDirectory>.\x64\Debug</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>

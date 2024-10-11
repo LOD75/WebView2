@@ -6,6 +6,8 @@
 #include <tchar.h>
 #include <wrl.h>
 #include <wil/com.h>
+#include <thread>
+#include <chrono>
 // include WebView2 header
 #include "WebView2.h"
 
@@ -180,7 +182,11 @@ int CALLBACK WinMain(
 							{
 								message = L"Printing " + std::wstring(title.get()) +
 									L" document to printer is succeeded";
-								MoveFileEx(L"C:\\Softlinx\\ReplixServer\\tmp\\ReplixFSP2F.TIF", outfile, MOVEFILE_REPLACE_EXISTING);
+								//std::this_thread::sleep_for(std::chrono::milliseconds(20000));
+								//if (PathFileExists(L"C:\\Softlinx\\ReplixServer\\tmp\\ReplixFSP2F.TIF"))
+								//MoveFileEx(L"C:\\Softlinx\\ReplixServer\\tmp\\ReplixFSP2F.TIF", outfile, MOVEFILE_REPLACE_EXISTING);
+								//else
+									//MessageBox(NULL, L"File not found", L"Error", MB_OK);
 								PostQuitMessage(0);
 							}
 							else if (
@@ -254,3 +260,4 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	return 0;
 }
+
